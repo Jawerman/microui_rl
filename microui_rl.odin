@@ -101,7 +101,9 @@ _to_rl_color :: proc(c: mu.Color) -> rl.Color {
 }
 
 _draw_icon :: proc(id: mu.Icon, rect: mu.Rect, color: rl.Color) {
-	#partial switch id {
+	switch id {
+	case .NONE:
+	// nothing to draw for NONE
 	case .CLOSE:
 		s := i32(rect.w / 4)
 		rl.DrawLine(rect.x + s, rect.y + s, rect.x + rect.w - s, rect.y + rect.h - s, color)
