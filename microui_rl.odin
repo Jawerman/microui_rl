@@ -36,9 +36,7 @@ deinit :: proc(ui_context: ^Context) {
 	free(ui_context.ctx)
 }
 
-update :: proc(ui_context: ^Context) {
-	ctx := ui_context.ctx
-
+update :: proc(ctx: ^mu.Context) {
 	m := rl.GetMousePosition()
 	mu.input_mouse_move(ctx, i32(m.x), i32(m.y))
 
@@ -66,8 +64,9 @@ update :: proc(ui_context: ^Context) {
 	_check_key(ctx, .RIGHT_CONTROL, .CTRL)
 }
 
-draw :: proc(ui_context: ^Context) {
-	ctx := ui_context.ctx
+draw :: proc(ctx: ^mu.Context) {
+
+	font_size: ^i32 = (^i32)(ctx.style.font)
 
 	cmd: ^mu.Command
 	for mu.next_command(ctx, &cmd) {
@@ -86,7 +85,7 @@ draw :: proc(ui_context: ^Context) {
 				fmt.ctprintf("%s", variant.str),
 				variant.pos.x,
 				variant.pos.y,
-				ui_context.font_size,
+				font_size^,
 				_to_rl_color(variant.color),
 			)
 
