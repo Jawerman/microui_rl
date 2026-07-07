@@ -6,28 +6,39 @@ import mu "vendor:microui"
 import rl "vendor:raylib"
 
 
-// Bonus: Larger and clearer font
-FONT_SIZE :: 20
+Context :: struct {
+	ctx:       ^mu.Context,
+	font_size: i32,
+}
 
-init :: proc(ctx: ^mu.Context) {
+init :: proc(ui_context: ^Context, style: mu.Style) {
+	ctx := new(mu.Context)
 	mu.init(ctx)
 
 	// Text callbacks with corrected types
 	ctx.text_width = proc(font: mu.Font, text: string) -> i32 {
-		return rl.MeasureText(fmt.ctprintf("%s", text), FONT_SIZE)
+		font_size: ^i32 = (^i32)(font)
+		return rl.MeasureText(fmt.ctprintf("%s", text), font_size^)
 	}
 	ctx.text_height = proc(font: mu.Font) -> i32 {
-		return FONT_SIZE
+		font_size: ^i32 = (^i32)(font)
+		return font_size^
 	}
 
-	// --- STYLE ADJUSTMENT (So it's not cramped) ---
-	// Increase widget padding (internal spacing)
-	ctx.style.padding = 6
-	ctx.style.spacing = 4
-	ctx.style.title_height = FONT_SIZE + 8
+	ctx.style^ = style
+	ctx.style.font = mu.Font(&ui_context.font_size)
+
+	ui_context.ctx = ctx
 }
 
-update :: proc(ctx: ^mu.Context) {
+
+deinit :: proc(ui_context: ^Context) {
+	free(ui_context.ctx)
+}
+
+update :: proc(ui_context: ^Context) {
+	ctx := ui_context.ctx
+
 	m := rl.GetMousePosition()
 	mu.input_mouse_move(ctx, i32(m.x), i32(m.y))
 
@@ -55,7 +66,9 @@ update :: proc(ctx: ^mu.Context) {
 	_check_key(ctx, .RIGHT_CONTROL, .CTRL)
 }
 
-draw :: proc(ctx: ^mu.Context) {
+draw :: proc(ui_context: ^Context) {
+	ctx := ui_context.ctx
+
 	cmd: ^mu.Command
 	for mu.next_command(ctx, &cmd) {
 		switch variant in cmd.variant {
@@ -73,7 +86,7 @@ draw :: proc(ctx: ^mu.Context) {
 				fmt.ctprintf("%s", variant.str),
 				variant.pos.x,
 				variant.pos.y,
-				FONT_SIZE,
+				ui_context.font_size,
 				_to_rl_color(variant.color),
 			)
 
