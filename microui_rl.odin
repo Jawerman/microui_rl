@@ -11,7 +11,7 @@ Context :: struct {
 	font_size: i32,
 }
 
-init :: proc(ui_context: ^Context, style: mu.Style) {
+init :: proc(ui_context: ^Context, style: mu.Style = mu.default_style) {
 	ctx := new(mu.Context)
 	mu.init(ctx)
 
